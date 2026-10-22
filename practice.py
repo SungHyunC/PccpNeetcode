@@ -198,9 +198,9 @@ def run_case(problem, func, case, timeout):
     except Exception:
         return False, None, time.perf_counter() - start, buf.getvalue(), traceback.format_exc(limit=-3)
     elapsed = time.perf_counter() - start
-    if present:
-        result = present(result)
     try:
+        if present:
+            result = present(result)
         ok = is_correct(problem, result, case["output"], raw_args)
     except Exception:
         return False, result, elapsed, buf.getvalue(), "결과 비교 중 오류:\n" + traceback.format_exc(limit=-2)
@@ -305,7 +305,7 @@ def cmd_show(args):
 def workspace_template(p):
     desc = textwrap.dedent(p.get("DESCRIPTION", "")).strip()
     header = f"{p.title} ({p.get('SOURCE', '')}) · {p.level}\n주제: {p.topic}\n\n{desc}"
-    header = header.replace('"""', "'''")
+    header = header.replace("\\", "\\\\").replace('"""', "'''")  # 백슬래시가 docstring 을 깨지 않도록
     lines = ['"""', header, '"""']
     imports = p.get("IMPORTS", "")
     if imports:
