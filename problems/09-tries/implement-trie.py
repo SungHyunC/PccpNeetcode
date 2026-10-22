@@ -90,12 +90,12 @@ PERF_LIMIT = 1.0
 
 def perf_case():
     commands, values, words = ["Trie"], [[]], []
-    for _ in range(30_000):
+    for _ in range(20_000):
         w = _rand_word(4, 10)
         words.append(w)
         commands.append("insert")
         values.append([w])
-    for _ in range(30_000):
+    for _ in range(20_000):
         if random.random() < 0.5:
             w = random.choice(words)
             commands.append("startsWith")

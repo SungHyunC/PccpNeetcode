@@ -1,5 +1,4 @@
 import random
-import string
 
 TITLE = "Word Search II (단어 찾기 II)"
 LEVEL = "Hard"
@@ -17,7 +16,7 @@ DESCRIPTION = """
 
 제한사항
 - 1 ≤ m, n ≤ 12
-- 1 ≤ len(words) ≤ 20,000, 1 ≤ len(words[i]) ≤ 10
+- 1 ≤ len(words) ≤ 30,000, 1 ≤ len(words[i]) ≤ 10
 - words 의 단어는 모두 다릅니다.
 - 효율성 테스트가 있습니다.
 
@@ -34,7 +33,7 @@ board = [["a","b"],["c","d"]], words = ["abcb"]  →  []
 SIGNATURE = "def solution(board: list[list[str]], words: list[str]) -> list[str]:"
 
 HINTS = [
-    "단어마다 따로 Word Search(격자 DFS)를 돌리면 단어 수 x 격자 크기 x 탐색 비용이 됩니다. 단어가 2만 개면 너무 느립니다.",
+    "단어마다 따로 Word Search(격자 DFS)를 돌리면 단어 수 x 격자 크기 x 탐색 비용이 됩니다. 단어가 3만 개면 너무 느립니다.",
     "모든 단어를 트라이에 넣고, 격자 DFS 를 한 번만 하면서 '지금까지 만든 문자열이 트라이의 경로에 있는가'를 동시에 확인하세요. 트라이에 없는 경로는 바로 중단(가지치기)합니다.",
     "트라이의 단어 끝 노드에 단어 자체를 저장해 두면(node.word = 'oath') 문자열을 따로 이어 붙일 필요가 없습니다. 찾으면 결과에 넣고 node.word = None 으로 중복을 막습니다.",
     "방문 표시는 board[r][c] 를 '#' 으로 바꿨다가 돌아올 때 되돌리는 방식이 간단합니다. 찾은 뒤 자식이 없어진 트라이 노드를 지우면 더 빨라집니다.",
@@ -67,12 +66,13 @@ TESTS = [
 
 COMPARE = "unordered"
 
-PERF_LIMIT = 1.5
+PERF_LIMIT = 1.0
 
 
 def perf_case():
     m = n = 12
-    board = [[random.choice("abcdefghijklmnoprstu") for _ in range(n)] for _ in range(m)]
+    alphabet = "abcdefgh"  # 글자 종류가 적을수록 경로가 많이 겹쳐 탐색이 깊어집니다
+    board = [[random.choice(alphabet) for _ in range(n)] for _ in range(m)]
     words = set()
     # 격자에서 실제로 만들 수 있는 단어 일부 + 무작위 단어 다수
     while len(words) < 300:
@@ -87,8 +87,8 @@ def perf_case():
             seen.add((r, c))
             path.append(board[r][c])
         words.add("".join(path))
-    while len(words) < 20_000:
-        words.add("".join(random.choice(string.ascii_lowercase) for _ in range(random.randint(3, 10))))
+    while len(words) < 30_000:
+        words.add("".join(random.choice(alphabet) for _ in range(random.randint(3, 10))))
     return {"input": [board, sorted(words)], "output": None}
 
 

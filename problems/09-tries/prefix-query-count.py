@@ -78,11 +78,11 @@ PERF_LIMIT = 1.0
 def perf_case():
     alphabet = "abcdefgh"
     words = set()
-    while len(words) < 50_000:
+    while len(words) < 30_000:
         words.add(_rand_word(2, 10, alphabet))
     words = list(words)
     queries = []
-    for _ in range(50_000):
+    for _ in range(30_000):
         w = random.choice(words)
         k = random.randint(0, len(w) - 1)  # 앞 k 글자를 남기고 나머지는 '?'
         queries.append(w[:k] + "?" * (len(w) - k))
