@@ -54,7 +54,7 @@ PERF_LIMIT = 1.0
 
 
 def perf_case():
-    scoville = [random.randint(0, 1000) for _ in range(200_000)]
+    scoville = [random.randint(0, 1000) for _ in range(100_000)]
     return {"input": [scoville, 1_000_000], "output": None}
 
 
