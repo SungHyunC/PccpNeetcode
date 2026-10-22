@@ -84,7 +84,8 @@ EXPLANATION = """
 
 면접 포인트
 - "가능한 상태의 집합이 구간이라서 양 끝만 관리하면 된다" 는 관찰이 핵심입니다. 이걸 말로 설명하세요.
-- max(lo, 0) 을 빼먹으면 "*)(" 같은 입력에서 틀립니다.
+- max(lo, 0) 을 빼먹으면 "(*)" 같은 입력에서 틀립니다.
+  ( → [1,1], * → [0,2], ) → [-1,1] 이 되어 끝에서 lo == -1 → False 로 잘못 판정. (정답은 True)
 """
 
 
@@ -111,7 +112,7 @@ def brute_force(s):
     from itertools import product
 
     stars = [i for i, ch in enumerate(s) if ch == "*"]
-    for choice in product("()", repeat=0) if not stars else product(["(", ")", ""], repeat=len(stars)):
+    for choice in product(["(", ")", ""], repeat=len(stars)):  # '*' 가 없으면 빈 튜플 하나
         chars = list(s)
         for idx, c in zip(stars, choice):
             chars[idx] = c

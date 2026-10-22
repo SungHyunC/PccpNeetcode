@@ -43,11 +43,13 @@ def perf_case():
     import random
 
     letters = "abcdefghijklmnopqrstuvwxyz"
-    # 앞부분은 글자 블록을 반복 → 여러 조각이 생기도록 구성
+    # 글자 두 개씩 섞은 블록 13개 → 조각이 여러 개 생기는 긴 문자열 (총 500,000 글자)
     parts = []
-    for k in range(26):
-        parts.append("".join(random.choice(letters[k]) for _ in range(10_000)))
-    return {"input": ["".join(parts) * 1 + "".join(random.choice(letters) for _ in range(100))], "output": None}
+    for k in range(13):
+        pair = letters[2 * k:2 * k + 2]
+        size = 500_000 // 13 + (1 if k < 500_000 % 13 else 0)
+        parts.append("".join(random.choice(pair) for _ in range(size)))
+    return {"input": ["".join(parts)], "output": None}
 
 
 EXPLANATION = """

@@ -60,17 +60,16 @@ PERF_LIMIT = 1.0
 def perf_case():
     import random
 
-    n = 100_000
-    gas = [random.randint(0, 10_000) for _ in range(n)]
-    cost = [random.randint(0, 10_000) for _ in range(n)]
-    diff = sum(gas) - sum(cost)
-    # 전체 합을 맞춰 답이 존재하도록 조정
-    i = 0
-    while diff < 0:
-        add = min(-diff, 10_000 - gas[i])
-        gas[i] += add
-        diff += add
-        i += 1
+    # [연료가 조금씩 남는 구간 99,960칸] + [큰 적자 20칸] + [큰 흑자 20칸]
+    # → 앞 구간의 어느 칸에서 출발해도 한참 달린 뒤 적자 구간에서 실패하므로
+    #   모든 출발점을 시뮬레이션하는 O(n^2) 풀이는 시간 초과
+    gas, cost = [], []
+    for _ in range(99_960):
+        r = random.randint(0, 9_999)
+        gas.append(r + 1)
+        cost.append(r)
+    gas += [0] * 20 + [10_000] * 20
+    cost += [10_000] * 20 + [0] * 20
     return {"input": [gas, cost], "output": None}
 
 
