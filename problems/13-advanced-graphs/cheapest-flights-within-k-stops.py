@@ -52,15 +52,22 @@ PERF_LIMIT = 1.0
 
 
 def perf_case():
-    n = 300
+    # 도시 0~269 는 촘촘한 무작위 항공망(도착지 299 로는 이어지지 않음),
+    # 0 → 290 → 291 → ... → 299 는 비싼 직행 사슬(비행 10번), 0 → 270 → ... → 279 → 299 는 싸지만 비행 11번.
+    # k = 9 이면 비싼 사슬만 허용됩니다. 모든 경로를 DFS 로 훑는 풀이는 촘촘한 항공망에서 빠져나오지 못합니다.
+    n, k = 300, 9
     pairs = set()
-    while len(pairs) < 10_000:
-        u, v = random.randrange(n), random.randrange(n)
+    while len(pairs) < 9_000:
+        u, v = random.randrange(270), random.randrange(270)
         if u != v:
             pairs.add((u, v))
-    flights = [[u, v, random.randint(1, 10_000)] for u, v in sorted(pairs)]
+    flights = [[u, v, random.randint(1, 10_000)] for u, v in sorted(pairs) if (u, v) != (0, 270)]
+    chain_a = [0] + list(range(290, 300))
+    chain_b = [0] + list(range(270, 280)) + [299]
+    flights += [[u, v, 1000] for u, v in zip(chain_a, chain_a[1:])]
+    flights += [[u, v, 1] for u, v in zip(chain_b, chain_b[1:])]
     random.shuffle(flights)
-    return {"input": [n, flights, 0, n - 1, 25], "output": None}
+    return {"input": [n, flights, 0, n - 1, k], "output": 10_000}
 
 
 EXPLANATION = """

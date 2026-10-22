@@ -53,10 +53,18 @@ PERF_LIMIT = 1.0
 
 
 def perf_case():
+    # 가운데 열에 가장 높은 값들로 "벽" 을 세워 답이 n² 근처가 되게 함
+    # → t 를 0 부터 하나씩 올리는 풀이는 수만 번 BFS 를 하게 됨
     n = 200
-    values = list(range(n * n))
-    random.shuffle(values)
-    grid = [values[r * n:(r + 1) * n] for r in range(n)]
+    wall = list(range(n * n - n, n * n))
+    rest = list(range(n * n - n))
+    random.shuffle(wall)
+    random.shuffle(rest)
+    grid = []
+    for r in range(n):
+        row = rest[r * (n - 1):(r + 1) * (n - 1)]
+        row.insert(n // 2, wall[r])
+        grid.append(row)
     return {"input": [grid], "output": None}
 
 

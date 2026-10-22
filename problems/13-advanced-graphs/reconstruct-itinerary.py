@@ -47,7 +47,7 @@ TESTS = [
     },
     {
         "input": [[["ICN", "DXB"], ["DXB", "ICN"], ["ICN", "AMS"], ["AMS", "DXB"], ["DXB", "AMS"]]],
-        "output": ["ICN", "AMS", "DXB", "AMS", "DXB", "ICN"],
+        "output": ["ICN", "AMS", "DXB", "ICN", "DXB", "AMS"],
     },
     {
         "input": [[["PUS", "ICN"], ["ICN", "PUS"], ["ICN", "GMP"], ["GMP", "CJU"], ["CJU", "ICN"]]],

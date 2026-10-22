@@ -51,11 +51,12 @@ PERF_LIMIT = 1.0
 
 def perf_case():
     n = 20_000
-    times = [[i, i + 1, 1000] for i in range(1, n)]        # 모든 서버에 도달 가능하도록 느린 사슬
+    # 비용 1 짜리 사슬 + 비싼 무작위 간선: 최단 경로가 간선을 많이 쓰게 되어 벨만-포드는 라운드가 많이 필요
+    times = [[i, i + 1, 1] for i in range(1, n)]
     for _ in range(100_000):
         u, v = random.randint(1, n), random.randint(1, n)
         if u != v:
-            times.append([u, v, random.randint(0, 1000)])
+            times.append([u, v, random.randint(100, 1000)])
     random.shuffle(times)
     return {"input": [times, n, 1], "output": None}
 
