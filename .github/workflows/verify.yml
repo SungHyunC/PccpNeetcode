@@ -1,0 +1,16 @@
+name: verify-problems
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 모범 풀이가 모든 테스트를 통과하는지 확인
+        run: python practice.py verify
