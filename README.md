@@ -4,8 +4,8 @@
 NeetCode 로드맵 순서로 개념 문서를 읽고, 로컬 채점기로 문제를 풀고, 웹 학습 허브에서 퀴즈·시각화·코드 퍼즐로 복습합니다.
 
 ```
-개념 문서 (docs/)  →  로컬 채점기 (practice.py)  →  웹 학습 허브 (web/index.html)
- 개념 + 템플릿 코드      문제 풀이 + 정확성/효율성 채점      퀴즈 · 시각화 · 퍼즐 · 모의고사 타이머
+인터랙티브 코스 (web/course.html)  →  개념 문서 (docs/)  →  로컬 채점기 (practice.py)  →  웹 학습 허브 (web/index.html)
+ 12장 스크롤 에세이 + 브라우저 실습       개념 + 템플릿 코드       정확성/효율성 채점          퀴즈 · 시각화 · 퍼즐 · 모의고사
 ```
 
 ## 빠른 시작
@@ -53,6 +53,17 @@ python practice.py solution two-sum     # 모범 풀이 + 해설
 
 `<문제>` 에는 `list` 의 번호, slug(`two-sum`), slug 일부(`anagram`) 를 쓸 수 있습니다.
 
+## 인터랙티브 코스: 모든 연산
+
+`web/course.html` 을 브라우저로 열면 12장짜리 스크롤형 코스가 나옵니다.
+"코드가 연산을 몇 번 하는가" 라는 질문 하나로 복잡도 → 해시 → 투 포인터 → 스택 → 이분 탐색 → 트리 → 힙 → BFS → 다익스트라 → DP → 구간 → 시뮬레이션까지 이어집니다.
+
+- 장마다 직접 조작하는 그림 (복잡도 스크롤리텔링, 해시맵·단조 스택·힙·다익스트라 단계 재생, 숫자 맞히기 게임, 미로 BFS/DFS, 피보나치 호출 트리 등)
+- 장마다 확인 퀴즈 1개와 **브라우저에서 바로 실행·채점하는 파이썬 실습** 1개 (Brython 사용, 인터넷 연결 필요)
+- 왼쪽 목차에 장별 완료 표시, 진도는 브라우저에 저장
+
+코스 원본은 `web/src/course.html`, `web/src/course.js` 이고, `python tools/export_web.py` 가 문제 데이터를 넣어 `web/course.html` 을 만듭니다.
+
 ## 웹 학습 허브
 
 `web/index.html` 을 브라우저로 열면 됩니다 (서버 불필요, 진행 상황은 브라우저에 저장).
@@ -96,7 +107,9 @@ workspace/             내 풀이 (practice.py start 가 만듦)
 lib/structures.py      ListNode, TreeNode 와 변환 헬퍼
 practice.py            로컬 채점기
 web/app.html           웹 학습 허브 원본 (데이터 내장)
-web/index.html         브라우저로 바로 여는 파일 (export 가 생성)
+web/index.html         웹 학습 허브 - 브라우저로 바로 여는 파일 (export 가 생성)
+web/src/               인터랙티브 코스 원본 (course.html, course.js)
+web/course.html        인터랙티브 코스 - 브라우저로 바로 여는 파일 (export 가 생성)
 tools/export_web.py    문제 데이터를 웹 허브에 내장
 STUDY_PLAN.md          4주 / 8주 / 12주 학습 계획
 CONTRIBUTING.md        문제·문서 작성 규칙

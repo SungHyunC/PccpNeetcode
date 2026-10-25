@@ -1,0 +1,651 @@
+<title>모든 연산</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;900&family=IBM+Plex+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Nanum+Pen+Script&display=swap">
+<style>
+/* Layout: 시험지 위의 긴 에세이. 왼쪽에 고정 목차, 가운데 68ch 본문, 그림과 실습은 본문보다 넓게 튀어나옴.
+   빨간 펜 = 채점과 경고, 형광펜 = 외워야 할 문장, 파란 볼펜 = 조작할 수 있는 것 */
+:root {
+  --paper: #f7f8fa;
+  --panel: #ffffff;
+  --ink: #111726;
+  --ink-2: #2b3245;
+  --muted: #5b6375;
+  --rule: #dde1e8;
+  --red: #d42e1c;
+  --red-soft: rgba(212, 46, 28, 0.09);
+  --mark: #ffe45a;
+  --mark-ink: #111726;
+  --blue: #1d4ed8;
+  --blue-soft: rgba(29, 78, 216, 0.09);
+  --ok: #0f7d47;
+  --ok-soft: rgba(15, 125, 71, 0.1);
+  --code-bg: #f0f2f6;
+  --kw: #8a2bc2; --str: #0c7a44; --num: #b4500a; --cmt: #7c8597; --fn: #1d4ed8;
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", "AppleMyungjo", serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --font-pen: "Nanum Pen Script", "Comic Sans MS", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d111a; --panel: #141a26; --ink: #e8eaf0; --ink-2: #cfd4df; --muted: #98a0b2; --rule: #262d3c;
+    --red: #ff6b57; --red-soft: rgba(255, 107, 87, 0.12); --mark: #f2d23c; --mark-ink: #111726;
+    --blue: #86a6ff; --blue-soft: rgba(134, 166, 255, 0.12); --ok: #4cc98b; --ok-soft: rgba(76, 201, 139, 0.12);
+    --code-bg: #10151f; --kw: #d39cff; --str: #7bd9a3; --num: #ffb67d; --cmt: #6f7a8e; --fn: #8fb2ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0d111a; --panel: #141a26; --ink: #e8eaf0; --ink-2: #cfd4df; --muted: #98a0b2; --rule: #262d3c;
+  --red: #ff6b57; --red-soft: rgba(255, 107, 87, 0.12); --mark: #f2d23c; --mark-ink: #111726;
+  --blue: #86a6ff; --blue-soft: rgba(134, 166, 255, 0.12); --ok: #4cc98b; --ok-soft: rgba(76, 201, 139, 0.12);
+  --code-bg: #10151f; --kw: #d39cff; --str: #7bd9a3; --num: #ffb67d; --cmt: #6f7a8e; --fn: #8fb2ff;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.75;
+  font-variant-ligatures: none;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--paper); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+a { color: var(--blue); }
+code, pre, kbd, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+p code, li code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+mark { background: linear-gradient(transparent 38%, var(--mark) 38%, var(--mark) 90%, transparent 90%); color: inherit; padding: 0 2px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) mark { background: var(--mark); color: var(--mark-ink); } }
+:root[data-theme="dark"] mark { background: var(--mark); color: var(--mark-ink); }
+
+/* 진행 막대 (빨간 펜 줄) */
+.readbar { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; height: 3px; background: var(--red); width: 0; z-index: 40; }
+
+/* 상단 바 (모바일) */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid var(--rule);
+  display: none; align-items: center; gap: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px;
+}
+.topbar b { font-family: var(--font-display); font-weight: 900; }
+.topbar .prog { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* 목차 */
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; padding-block: 28px; max-height: calc(100vh - 24px); overflow-y: auto; }
+.toc .brand { font-family: var(--font-display); font-weight: 900; font-size: 22px; line-height: 1.2; }
+.toc .sub { font-size: 12.5px; color: var(--muted); margin: 4px 0 18px; line-height: 1.5; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.toc a { display: grid; grid-template-columns: 22px 26px 1fr; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 6px; color: var(--ink-2); text-decoration: none; font-size: 14px; line-height: 1.35; }
+.toc a:hover { background: var(--blue-soft); }
+.toc a.now { background: var(--panel); box-shadow: inset 2px 0 0 var(--red); color: var(--ink); font-weight: 500; }
+.toc .n { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.ring { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--rule); display: inline-block; position: relative; }
+.ring.half { border-color: var(--red); background: linear-gradient(90deg, var(--red) 50%, transparent 50%); }
+.ring.full { border-color: var(--ok); background: var(--ok); }
+.toc .total { margin-top: 18px; font-size: 13px; color: var(--muted); display: grid; gap: 6px; }
+.meter { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .4s; }
+.toc .reset { border: 0; background: none; padding: 0; color: var(--muted); font-size: 12px; text-decoration: underline; justify-self: start; }
+
+/* 본문 */
+main { min-width: 0; padding-block: 0 120px; }
+.col { max-width: 700px; margin: 0 auto; }
+.wide { max-width: 980px; margin: 0 auto; }
+
+.hero { padding-block: 72px 40px; border-bottom: 1px solid var(--rule); margin-bottom: 24px; }
+.hero .kicker { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--red); font-weight: 700; }
+.hero h1 { font-family: var(--font-display); font-weight: 900; font-size: clamp(56px, 13vw, 132px); line-height: 0.95; letter-spacing: -2px; margin: 12px 0 18px; text-wrap: balance; }
+.hero .lede { font-size: clamp(18px, 2.4vw, 22px); line-height: 1.6; color: var(--ink-2); max-width: 34em; margin: 0; }
+.counter { margin-top: 32px; display: grid; gap: 4px; }
+.counter .num { font-family: var(--font-mono); font-size: clamp(28px, 6vw, 46px); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -1px; color: var(--red); line-height: 1.1; overflow-wrap: anywhere; }
+.counter .lbl { font-size: 13.5px; color: var(--muted); }
+.howto { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); }
+.howto span::before { content: "— "; color: var(--red); }
+
+section.chapter { padding-block: 64px 24px; border-bottom: 1px solid var(--rule); }
+.opener { display: grid; grid-template-columns: auto 1fr; gap: 0 22px; align-items: end; margin-bottom: 28px; }
+.opener .num { font-family: var(--font-display); font-weight: 900; font-size: clamp(72px, 14vw, 140px); line-height: 0.8; color: var(--red); letter-spacing: -4px; }
+.opener h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(30px, 5vw, 46px); line-height: 1.15; margin: 0; text-wrap: balance; }
+.opener .thesis { grid-column: 1 / -1; margin: 18px 0 0; font-size: 19px; color: var(--ink-2); line-height: 1.6; max-width: 36em; }
+.tags { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.tag { font-size: 12px; letter-spacing: 0.4px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--rule); color: var(--muted); background: var(--panel); white-space: nowrap; }
+.tag.hot { color: var(--red); border-color: var(--red); }
+
+.col p { margin: 0 0 1.1em; }
+.col h3 { font-family: var(--font-display); font-weight: 700; font-size: 23px; margin: 1.8em 0 0.6em; line-height: 1.35; text-wrap: balance; }
+.pen { font-family: var(--font-pen); color: var(--red); font-size: 25px; line-height: 1.25; transform: rotate(-1.2deg); margin: 1.2em 0 1.4em; padding-left: 14px; border-left: 2px solid var(--red); }
+.pull { font-family: var(--font-display); font-weight: 900; font-size: clamp(24px, 3.4vw, 32px); line-height: 1.4; margin: 1.4em 0; text-wrap: balance; }
+
+pre.code { margin: 0 0 1.2em; background: var(--code-bg); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; overflow-x: auto; line-height: 1.6; font-size: 14px; tab-size: 4; }
+.tk-kw { color: var(--kw); font-weight: 600; } .tk-str { color: var(--str); } .tk-num { color: var(--num); } .tk-cmt { color: var(--cmt); font-style: italic; } .tk-fn { color: var(--fn); }
+
+/* 그림 */
+figure.fig { margin: 2em auto; max-width: 980px; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+figure.fig figcaption { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+figure.fig figcaption b { color: var(--ink); }
+.fig-title { font-weight: 700; font-size: 15px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.fig-title .try { font-family: var(--font-pen); color: var(--blue); font-size: 21px; font-weight: 400; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.btn { border: 1px solid var(--rule); background: var(--panel); border-radius: 8px; padding: 6px 13px; font-size: 14px; font-weight: 500; line-height: 1.5; }
+.btn:hover { border-color: var(--blue); }
+.btn.on, .btn.primary { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+.btn.red { background: var(--red); border-color: var(--red); color: var(--panel); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+input[type="text"], input[type="number"], select { border: 1px solid var(--rule); background: var(--panel); border-radius: 8px; padding: 6px 10px; font-size: 14px; min-width: 0; }
+input[type="range"] { accent-color: var(--blue); width: 100%; }
+.small { font-size: 13px; } .muted { color: var(--muted); }
+.log { font-family: var(--font-mono); font-size: 13px; background: var(--code-bg); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--rule); min-height: 44px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.scroll-x { overflow-x: auto; }
+svg text { font-family: var(--font-body); }
+
+.cells { display: flex; gap: 4px; flex-wrap: wrap; padding-bottom: 18px; }
+.cell { min-width: 40px; height: 42px; padding: 0 6px; border: 1.5px solid var(--rule); border-radius: 6px; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 600; background: var(--panel); position: relative; font-variant-numeric: tabular-nums; font-size: 14px; }
+.cell small { position: absolute; bottom: -18px; left: 0; right: 0; text-align: center; font-size: 10px; color: var(--muted); font-weight: 400; }
+.cell.dim { opacity: 0.3; } .cell.in { background: var(--blue-soft); border-color: var(--blue); }
+.cell.cur { background: var(--mark); border-color: var(--mark); color: var(--mark-ink); }
+.cell.good { background: var(--ok); border-color: var(--ok); color: var(--panel); }
+.cell.bad { background: var(--red-soft); border-color: var(--red); }
+.ptrs { display: flex; gap: 4px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--blue); min-height: 16px; }
+.ptrs span { min-width: 40px; text-align: center; padding: 0 6px; }
+.kv { border-collapse: collapse; font-family: var(--font-mono); font-size: 13px; }
+.kv th, .kv td { border: 1px solid var(--rule); padding: 4px 10px; text-align: center; font-variant-numeric: tabular-nums; }
+.kv th { background: var(--code-bg); color: var(--muted); font-weight: 600; }
+.kv td.hit { background: var(--mark); color: var(--mark-ink); }
+.controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.controls .pos { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.two { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.stat { display: grid; gap: 2px; }
+.stat b { font-family: var(--font-mono); font-size: 26px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { font-size: 12.5px; color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+
+/* 스크롤리텔링 */
+.scrolly { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; max-width: 980px; margin: 2em auto; }
+.scrolly .sticky { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; margin: 0; }
+.steps { display: grid; gap: 36vh; padding-block: 8vh 30vh; }
+.step { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 18px 20px; opacity: 0.55; transition: opacity .3s, border-color .3s; }
+.step.active { opacity: 1; border-color: var(--red); }
+.step p { margin: 0; }
+.step .n { font-family: var(--font-mono); font-size: 12px; color: var(--red); font-weight: 600; display: block; margin-bottom: 4px; }
+
+/* 퀴즈 */
+.quiz { margin: 2em 0; border-top: 2px solid var(--ink); padding-top: 16px; display: grid; gap: 12px; }
+.quiz .q { font-weight: 700; font-size: 18px; line-height: 1.5; }
+.quiz .eyebrow { font-size: 12px; letter-spacing: 1.6px; color: var(--red); font-weight: 700; }
+.opts { display: grid; gap: 8px; }
+.opt { text-align: left; border: 1.5px solid var(--rule); background: var(--panel); border-radius: 10px; padding: 11px 14px; font-size: 15.5px; line-height: 1.5; }
+.opt:hover:not(:disabled) { border-color: var(--blue); }
+.opt.right { border-color: var(--ok); background: var(--ok-soft); }
+.opt.wrong { border-color: var(--red); background: var(--red-soft); }
+.opt:disabled { cursor: default; }
+.why { border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+.why.ok { background: var(--ok-soft); } .why.no { background: var(--red-soft); }
+
+/* 코드 실습 */
+.lab { margin: 2.2em auto; max-width: 980px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--panel); overflow: hidden; min-width: 0; }
+.lab-head { padding: 16px 18px; border-bottom: 1px solid var(--rule); display: grid; gap: 6px; }
+.lab-head .eyebrow { font-size: 12px; letter-spacing: 1.6px; color: var(--blue); font-weight: 700; }
+.lab-head h4 { margin: 0; font-size: 19px; font-weight: 700; }
+.lab-desc { font-size: 14.5px; line-height: 1.7; white-space: pre-wrap; margin: 0; color: var(--ink-2); max-height: 260px; overflow-y: auto; }
+.lab-desc.open { max-height: none; }
+.lab-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.editor-wrap { border-right: 1px solid var(--rule); display: grid; min-width: 0; }
+textarea.editor {
+  width: 100%; min-height: 300px; resize: vertical; border: 0; background: var(--code-bg); color: var(--ink);
+  font-family: var(--font-mono); font-size: 14px; line-height: 1.6; padding: 14px 16px; tab-size: 4; white-space: pre; overflow-wrap: normal; overflow-x: auto;
+}
+textarea.editor:focus { outline: none; box-shadow: inset 0 0 0 2px var(--blue); }
+.lab-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--rule); align-items: center; }
+.lab-actions .kbd { font-size: 12px; color: var(--muted); margin-left: auto; }
+.results { padding: 12px 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.verdict { font-family: var(--font-display); font-weight: 900; font-size: 26px; line-height: 1.2; }
+.verdict.ok { color: var(--ok); } .verdict.no { color: var(--red); }
+.tcase { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.5; padding: 6px 0; border-bottom: 1px dashed var(--rule); }
+.tcase .m { font-weight: 700; } .tcase .m.ok { color: var(--ok); } .tcase .m.no { color: var(--red); }
+.tcase div { overflow-wrap: anywhere; }
+.stdout { font-family: var(--font-mono); font-size: 12.5px; background: var(--code-bg); border-radius: 6px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow-y: auto; }
+.err { font-family: var(--font-mono); font-size: 12.5px; background: var(--red-soft); border-radius: 6px; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.lab-foot { padding: 12px 18px; border-top: 1px solid var(--rule); display: grid; gap: 8px; font-size: 14px; }
+.hintbox { background: var(--mark); color: var(--mark-ink); border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+.cmd { display: inline-flex; gap: 6px; align-items: center; font-family: var(--font-mono); font-size: 12.5px; background: var(--code-bg); border-radius: 6px; padding: 2px 4px 2px 10px; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+
+.done-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 1.4em; font-size: 14px; color: var(--muted); }
+.done-row .ring { width: 18px; height: 18px; }
+.more { font-size: 14.5px; color: var(--muted); border-left: 3px solid var(--rule); padding-left: 12px; margin-top: 1.6em; }
+footer.end { padding-block: 64px 24px; }
+
+/* 시각화별 */
+.gridviz { display: grid; gap: 2px; width: max-content; max-width: 100%; }
+.gcell { width: 28px; height: 28px; border-radius: 4px; background: var(--code-bg); border: 1px solid var(--rule); padding: 0; font-family: var(--font-mono); font-size: 10px; color: var(--muted); display: grid; place-items: center; }
+.gcell.wall { background: var(--ink); border-color: var(--ink); }
+.gcell.seen { background: var(--blue-soft); color: var(--ink); border-color: var(--blue); }
+.gcell.front { background: var(--mark); color: var(--mark-ink); }
+.gcell.path { background: var(--ok); color: var(--panel); border-color: var(--ok); }
+.gcell.se { outline: 2px solid var(--red); outline-offset: -2px; font-weight: 700; color: var(--red); }
+.bars { display: flex; align-items: flex-end; gap: 4px; height: 150px; padding-top: 18px; }
+.bars .b { flex: 1; min-width: 18px; background: var(--rule); border-radius: 4px 4px 0 0; position: relative; display: flex; justify-content: center; }
+.bars .b span { position: absolute; top: -18px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.bars .b.cur { background: var(--mark); } .bars .b.st { background: var(--blue); } .bars .b.done { background: var(--ok); }
+.pstrip { display: grid; gap: 1px; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); height: 34px; border-radius: 6px; overflow: hidden; }
+.pstrip i { background: var(--red-soft); } .pstrip i.y { background: var(--ok-soft); }
+.pstrip i.at { background: var(--red); } .pstrip i.y.at { background: var(--ok); }
+.pstrip i.lohi { box-shadow: inset 0 -4px 0 var(--blue); }
+.rangebar { position: relative; height: 26px; background: var(--code-bg); border-radius: 6px; border: 1px solid var(--rule); overflow: hidden; }
+.rangebar i { position: absolute; top: 0; bottom: 0; background: var(--blue-soft); border-left: 2px solid var(--blue); border-right: 2px solid var(--blue); transition: left .3s, width .3s; }
+
+@media (max-width: 980px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .toc { display: none; }
+  .toc.open { display: block; position: fixed; inset: calc(env(safe-area-inset-top, 0px) + 52px) 0 0 0; max-height: none; z-index: 25; background: var(--paper);
+    padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .topbar { display: flex; }
+  .scrolly { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .scrolly .sticky { top: calc(env(safe-area-inset-top, 0px) + 54px); z-index: 2; }
+  .steps { gap: 50vh; padding-block: 4vh 20vh; position: relative; z-index: 3; }
+  .lab-body { grid-template-columns: minmax(0, 1fr); }
+  .editor-wrap { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .two { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  figure.fig { padding: 14px; }
+  .gcell { width: 22px; height: 22px; font-size: 9px; }
+  .opener { grid-template-columns: minmax(0, 1fr); }
+  .opener .num { margin-bottom: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+
+<div class="readbar" id="readbar"></div>
+<div class="topbar">
+  <b>모든 연산</b>
+  <span class="prog" id="top-prog"></span>
+  <button class="btn" id="toc-toggle" aria-expanded="false" aria-controls="toc">목차</button>
+</div>
+
+<div class="shell">
+  <nav class="toc" id="toc" aria-label="목차">
+    <div class="brand">모든 연산</div>
+    <div class="sub">PCCP · 미국 테크 인터뷰를 위한 12장 인터랙티브 코스</div>
+    <ol id="toc-list"></ol>
+    <div class="total">
+      <span id="toc-total">0 / 12 장 완료</span>
+      <div class="meter"><i id="toc-meter"></i></div>
+      <button class="reset" id="reset-progress">진도 초기화</button>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero col">
+      <div class="kicker">Every Operation Counts</div>
+      <h1>모든<br>연산</h1>
+      <p class="lede">코딩 테스트는 결국 하나를 묻습니다. <mark>당신의 코드는 연산을 몇 번 하는가.</mark> 이 코스는 그 질문 하나로 해시부터 다익스트라, DP, 시뮬레이션까지 12장을 지나갑니다. 읽고, 만져 보고, 직접 코드를 실행해 채점받으세요.</p>
+      <div class="counter" aria-live="off">
+        <span class="num" id="op-counter">0</span>
+        <span class="lbl">이 페이지를 연 뒤로, 파이썬이 할 수 있었던 단순 연산의 수 (초당 약 1,000만 번)</span>
+      </div>
+      <div class="howto">
+        <span>장마다 그림을 조작하고</span><span>퀴즈 하나를 맞히고</span><span>코드 실습을 통과하면 완료</span><span>진도는 이 브라우저에 저장</span>
+      </div>
+    </header>
+
+    <!-- 00 -->
+    <section class="chapter" id="ch-bigo" data-title="N이 모든 것을 정한다" data-num="00">
+      <div class="col">
+        <div class="opener">
+          <div class="num">00</div>
+          <h2>N이 모든 것을<br>정한다</h2>
+          <p class="thesis">문제를 읽기 전에 제한사항부터 보세요. 입력 크기 N 하나가 쓸 수 있는 알고리즘을 거의 다 골라 줍니다.</p>
+          <div class="tags"><span class="tag hot">모든 문제의 첫 단계</span><span class="tag">복잡도</span><span class="tag">docs/01-complexity.md</span></div>
+        </div>
+        <p>채점 서버는 친절하지 않습니다. 정답을 내더라도 제한 시간을 넘기면 0점입니다. 그래서 고수들은 코드를 쓰기 전에 계산부터 합니다. "이 방법이면 연산을 몇 번 하지?"</p>
+        <p>기준은 단순합니다. <mark>파이썬은 1초에 대략 1,000만(10⁷) 번의 단순 연산을 합니다.</mark> 연산 횟수가 이 선을 넘으면 위험하고, 100배 넘으면 확실히 시간 초과입니다. 오른쪽 그림을 보며 스크롤해 보세요.</p>
+      </div>
+
+      <div class="scrolly" id="scrolly-bigo">
+        <figure class="fig sticky" data-widget="bigo" aria-label="입력 크기별 연산 횟수 그래프"></figure>
+        <div class="steps">
+          <div class="step" data-n="8"><span class="n">N = 8</span><p>작은 N 에서는 무엇이든 통과합니다. 모든 순서를 다 해 보는 O(N!) 도 4만 번이면 끝납니다. <b>N ≤ 10 이면 완전탐색</b>을 의심하세요.</p></div>
+          <div class="step" data-n="20"><span class="n">N = 20</span><p>N! 은 이미 10¹⁸ 을 넘었습니다. 하지만 2ᴺ 은 약 100만. 각 원소를 넣을지 말지 정하는 <b>부분집합·백트래킹</b>은 아직 됩니다.</p></div>
+          <div class="step" data-n="3000"><span class="n">N = 3,000</span><p>2ᴺ 은 우주의 나이를 넘었습니다. 이제 O(N²) 이 900만 번으로 선에 걸칩니다. <b>2중 반복문, 2차원 DP</b>의 영역입니다.</p></div>
+          <div class="step" data-n="100000"><span class="n">N = 100,000</span><p>코딩 테스트에서 가장 흔한 크기입니다. O(N²) 은 100억 번, 약 17분. 여기서 필요한 것은 <b>O(N log N) 이하</b>: 정렬, 힙, 이분 탐색, 해시, 투 포인터.</p></div>
+          <div class="step" data-n="1000000000"><span class="n">N = 1,000,000,000</span><p>배열을 한 번 훑는 것조차 100초. 남은 건 <b>O(log N)</b> 뿐입니다. 답의 범위를 반씩 줄이는 이분 탐색, 혹은 수학 공식.</p></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <p>이 표를 외우면 문제를 읽는 순서가 바뀝니다. 지문보다 먼저 제한사항에서 N 을 찾고, 목표 복잡도를 정하고, 그 복잡도로 가능한 도구만 머릿속에 남깁니다.</p>
+        <div class="pen">N ≤ 10⁵ 이면 이중 for 문은 쓰기도 전에 지운다.</div>
+        <div class="quiz" data-quiz="bigo"></div>
+        <div class="lab" data-cell="warmup-range"></div>
+      </div>
+    </section>
+
+    <!-- 01 -->
+    <section class="chapter" id="ch-hash" data-title="기억하는 데 드는 비용" data-num="01">
+      <div class="col">
+        <div class="opener">
+          <div class="num">01</div>
+          <h2>기억하는 데<br>드는 비용</h2>
+          <p class="thesis">"이미 본 적 있나?" 를 O(1) 에 답할 수 있다면, 안쪽 반복문 하나가 통째로 사라집니다.</p>
+          <div class="tags"><span class="tag hot">PCCP 단골</span><span class="tag hot">인터뷰 1순위</span><span class="tag">해시 · set · dict</span><span class="tag">docs/02-arrays-hashing.md</span></div>
+        </div>
+        <p>배열에서 더해서 target 이 되는 두 수를 찾는다고 합시다. 가장 먼저 떠오르는 방법은 모든 쌍을 확인하는 것입니다. N 개면 쌍은 N(N-1)/2 개. N 이 10만이면 50억 번입니다.</p>
+        <p>그런데 지금 보고 있는 수가 x 라면, 필요한 짝은 정해져 있습니다. <mark>target − x.</mark> 그 값을 "전에 본 적이 있는지"만 알면 됩니다. 해시맵(dict)은 이 질문에 평균 O(1) 로 답합니다. 메모리를 조금 써서 시간을 사는 거래입니다.</p>
+      </div>
+      <figure class="fig" data-widget="hash"></figure>
+      <div class="col">
+        <pre class="code" data-code="seen = {}                      # 값 -> 인덱스
+for i, x in enumerate(nums):
+    if target - x in seen:     # 짝을 먼저 확인하고
+        return [seen[target - x], i]
+    seen[x] = i                # 그다음 나를 기록"></pre>
+        <p>순서가 중요합니다. 자기 자신을 먼저 기록하면 target 이 6 이고 x 가 3 일 때 자기 자신과 짝을 지어 버립니다. <mark>확인 먼저, 기록은 나중.</mark></p>
+        <h3>같은 거래, 다른 얼굴들</h3>
+        <p>"몇 번 나왔나" 는 <code>Counter</code>, "같은 그룹인가" 는 정규화한 키(정렬한 문자열)로 묶는 <code>defaultdict(list)</code>, "합이 k 인 구간이 몇 개인가" 는 누적합을 dict 에 세는 방식. 모두 같은 아이디어입니다. 기억해 두면 다시 찾지 않아도 된다.</p>
+        <div class="quiz" data-quiz="hash"></div>
+        <div class="lab" data-cell="two-sum"></div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chapter" id="ch-window" data-title="두 손가락으로 훑기" data-num="02">
+      <div class="col">
+        <div class="opener">
+          <div class="num">02</div>
+          <h2>두 손가락으로<br>훑기</h2>
+          <p class="thesis">왼쪽 끝과 오른쪽 끝이 각각 한 방향으로만 움직이면, 반복문이 겹쳐 보여도 전체는 O(N) 입니다.</p>
+          <div class="tags"><span class="tag hot">인터뷰 단골</span><span class="tag">투 포인터 · 슬라이딩 윈도우</span><span class="tag">docs/03 · docs/04</span></div>
+        </div>
+        <p>"조건을 만족하는 가장 긴 연속 구간" 을 찾는 문제는 모든 시작점과 끝점을 다 보면 O(N²) 입니다. 하지만 구간을 창문이라고 생각하면 다르게 볼 수 있습니다.</p>
+        <p>오른쪽 끝 r 을 한 칸씩 늘립니다. 창문 안이 조건을 어기면 왼쪽 끝 l 을 조건이 다시 맞을 때까지 당깁니다. <mark>l 과 r 은 절대 뒤로 가지 않습니다.</mark> 그래서 두 손가락이 움직이는 총 횟수는 많아야 2N 번입니다.</p>
+      </div>
+      <figure class="fig" data-widget="window"></figure>
+      <div class="col">
+        <div class="pull">for 안에 while 이 있다고 O(N²) 이 아니다. 각 원소가 몇 번 들어오고 나가는지를 세라.</div>
+        <p>이런 계산법을 <b>상각 분석(amortized analysis)</b> 이라고 부릅니다. 면접에서 "while 문이 안에 있는데 왜 O(N) 인가요?" 라는 질문이 나오면 이렇게 답하세요. "Each index enters and leaves the window at most once."</p>
+        <p>단, 슬라이딩 윈도우에는 전제가 있습니다. 창을 넓힐수록 조건이 한쪽으로만 변해야 합니다. 음수가 섞인 배열에서 "합이 k" 를 찾을 때는 창을 넓혀도 합이 줄 수 있으므로, 1장의 누적합 + 해시로 돌아가야 합니다.</p>
+        <div class="quiz" data-quiz="window"></div>
+        <div class="lab" data-cell="longest-substring-without-repeating"></div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chapter" id="ch-stack" data-title="아직 답을 못 찾은 것들의 줄" data-num="03">
+      <div class="col">
+        <div class="opener">
+          <div class="num">03</div>
+          <h2>아직 답을 못 찾은<br>것들의 줄</h2>
+          <p class="thesis">"다음으로 더 큰 값은 언제 나오나?" 를 묻는 문제에서, 스택은 기다리는 원소들의 대기실입니다.</p>
+          <div class="tags"><span class="tag hot">PCCP 단골</span><span class="tag">스택 · 단조 스택</span><span class="tag">docs/05-stack.md</span></div>
+        </div>
+        <p>매일의 기온이 주어지고, 각 날에 대해 "며칠을 기다려야 더 따뜻해지는가" 를 구한다고 합시다. 각 날마다 앞으로 쭉 훑으면 O(N²) 입니다.</p>
+        <p>거꾸로 생각해 봅시다. 오늘 기온이 25도라면, 아직 더 따뜻한 날을 만나지 못한 과거의 날들 중 25도보다 추웠던 날은 <mark>오늘이 바로 그 답</mark>입니다. 그 날들을 줄에서 빼면서 답을 적습니다. 줄에 남는 날들은 자연스럽게 기온이 내려가는 순서가 됩니다. 이것이 단조 스택(monotonic stack) 입니다.</p>
+      </div>
+      <figure class="fig" data-widget="stack"></figure>
+      <div class="col">
+        <pre class="code" data-code="ans = [0] * len(temps)
+stack = []                                  # 아직 답을 못 찾은 날의 인덱스
+for i, t in enumerate(temps):
+    while stack and temps[stack[-1]] < t:   # 오늘이 그들의 답
+        j = stack.pop()
+        ans[j] = i - j
+    stack.append(i)"></pre>
+        <p>각 날은 스택에 한 번 들어가고 한 번 나옵니다. 그러니 이것도 O(N). 괄호 짝 맞추기, 히스토그램에서 가장 큰 직사각형, 주식 가격이 떨어지지 않은 기간도 모두 같은 "대기실" 패턴입니다.</p>
+        <div class="quiz" data-quiz="stack"></div>
+        <div class="lab" data-cell="daily-temperatures"></div>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chapter" id="ch-bsearch" data-title="절반씩 버리기" data-num="04">
+      <div class="col">
+        <div class="opener">
+          <div class="num">04</div>
+          <h2>절반씩<br>버리기</h2>
+          <p class="thesis">답을 직접 찾기 어렵다면, 답을 하나 찍고 "이 정도면 되나?" 만 물어보세요. 예/아니오가 한 번만 바뀐다면 이분 탐색이 됩니다.</p>
+          <div class="tags"><span class="tag hot">PCCP 고난도 단골</span><span class="tag">이분 탐색 · 파라메트릭 서치</span><span class="tag">docs/06-binary-search.md</span></div>
+        </div>
+        <p>1부터 1,000 사이의 숫자 하나를 맞히는 게임을 해 봅시다. 틀릴 때마다 "더 크다/작다" 만 알려 줍니다. 아래 게임에서 직접 해 보고, 이분 탐색에게도 맡겨 보세요.</p>
+      </div>
+      <figure class="fig" data-widget="guess"></figure>
+      <div class="col">
+        <p>매번 남은 범위의 가운데를 고르면 범위가 절반이 됩니다. 1,000 → 500 → 250 → … → 1. <mark>2¹⁰ = 1,024 이므로 10번이면 무조건 맞힙니다.</mark> 범위가 10¹⁸ 이어도 60번이면 됩니다.</p>
+        <h3>파라메트릭 서치: 답을 찍고 물어보기</h3>
+        <p>PCCP 의 단골 '입국심사' 유형을 봅시다. 심사관마다 한 명을 처리하는 시간이 다르고 (예: 7분, 10분), n 명을 모두 심사하는 최소 시간을 구합니다. 시간을 직접 계산하기는 어렵습니다. 하지만 "T 분이 주어지면 몇 명을 처리할 수 있나?" 는 쉽습니다. <code>sum(T // t for t in times)</code>.</p>
+        <p>그리고 T 가 커질수록 처리 인원은 줄지 않습니다. 즉 "n 명 처리 가능?" 의 답은 <mark>아니오, 아니오, …, 예, 예, 예</mark> 처럼 딱 한 번 바뀝니다. 그 경계를 이분 탐색으로 찾으면 됩니다.</p>
+      </div>
+      <figure class="fig" data-widget="parametric"></figure>
+      <div class="col">
+        <pre class="code" data-code="lo, hi = 1, max(times) * n          # 답은 반드시 이 안에 있다
+while lo < hi:
+    mid = (lo + hi) // 2
+    if sum(mid // t for t in times) >= n:
+        hi = mid                         # 된다 → 더 짧은 시간도 시도
+    else:
+        lo = mid + 1                     # 안 된다 → 더 긴 시간 필요
+return lo"></pre>
+        <div class="pen">"최소 시간", "최대 거리" + 입력이 10⁹ 이상 → 파라메트릭 서치 의심.</div>
+        <div class="quiz" data-quiz="bsearch"></div>
+        <div class="lab" data-cell="minimum-time-to-complete-trips"></div>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chapter" id="ch-tree" data-title="아이들에게 묻고 위로 올리기" data-num="05">
+      <div class="col">
+        <div class="opener">
+          <div class="num">05</div>
+          <h2>아이들에게 묻고<br>위로 올리기</h2>
+          <p class="thesis">트리 문제의 대부분은 같은 질문입니다. "왼쪽과 오른쪽 서브트리가 답을 알려 준다면, 나는 무엇을 계산하면 되나?"</p>
+          <div class="tags"><span class="tag hot">인터뷰 최다 출제</span><span class="tag">트리 · 재귀 · DFS/BFS</span><span class="tag">docs/08-trees.md</span></div>
+        </div>
+        <p>트리를 방문하는 순서는 네 가지입니다. 노드 자신을 언제 처리하느냐의 차이입니다. 내려가기 전(전위), 왼쪽을 다녀온 뒤(중위), 양쪽을 다 다녀온 뒤(후위), 그리고 층별로(레벨 순서, BFS).</p>
+      </div>
+      <figure class="fig" data-widget="tree"></figure>
+      <div class="col">
+        <p>이진 탐색 트리(BST)를 중위 순회하면 값이 <mark>정렬된 순서</mark>로 나옵니다. "BST 에서 k 번째로 작은 값" 같은 문제가 바로 풀리는 이유입니다.</p>
+        <p>그리고 가장 강력한 것은 후위 순회 모양의 재귀입니다. 아이들에게 먼저 물어보고, 그 답으로 내 답을 만들어 위로 올립니다. 높이, 지름, 균형 여부, 경로의 최대 합이 모두 이 틀에 들어갑니다.</p>
+        <pre class="code" data-code="def depth(node):
+    if node is None:                 # 빈 트리의 높이는 0
+        return 0
+    left = depth(node.left)          # 아이들에게 묻고
+    right = depth(node.right)
+    return 1 + max(left, right)      # 내 답을 만들어 위로"></pre>
+        <div class="pen">재귀를 믿어라. 아이들의 답이 맞다고 가정하고 내 한 줄만 쓴다.</div>
+        <div class="quiz" data-quiz="tree"></div>
+        <div class="lab" data-cell="maximum-depth-of-binary-tree"></div>
+      </div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chapter" id="ch-heap" data-title="가장 작은 것만 꺼내 주는 상자" data-num="06">
+      <div class="col">
+        <div class="opener">
+          <div class="num">06</div>
+          <h2>가장 작은 것만<br>꺼내 주는 상자</h2>
+          <p class="thesis">전체를 정렬할 필요가 없을 때가 있습니다. 매번 가장 작은(또는 큰) 하나만 필요하다면 힙이 O(log N) 에 꺼내 줍니다.</p>
+          <div class="tags"><span class="tag hot">PCCP 단골</span><span class="tag">힙 · 우선순위 큐 · heapq</span><span class="tag">docs/10-heap.md</span></div>
+        </div>
+        <p>힙은 배열 하나로 만든 완전 이진 트리입니다. 인덱스 i 의 아이는 2i+1 과 2i+2, 부모는 (i−1)//2. 규칙은 하나뿐입니다. <mark>부모는 아이보다 작거나 같다.</mark> 그래서 맨 위(인덱스 0)가 항상 최솟값입니다.</p>
+        <p>값을 넣으면 맨 끝에 붙인 뒤 부모보다 작은 동안 위로 올라갑니다. 꺼낼 때는 맨 끝 값을 맨 위로 옮긴 뒤 아이보다 큰 동안 아래로 내려갑니다. 둘 다 트리의 높이, 즉 log N 번이면 끝납니다.</p>
+      </div>
+      <figure class="fig" data-widget="heap"></figure>
+      <div class="col">
+        <pre class="code" data-code="import heapq
+h = []
+heapq.heappush(h, 5)       # O(log N)
+smallest = heapq.heappop(h)
+heapq.heappush(h, -x)      # 최대 힙이 필요하면 부호를 뒤집어 넣기
+heapq.heappush(h, (dist, node))   # 튜플은 첫 원소부터 비교"></pre>
+        <p>"k 번째로 큰 값" 은 크기 k 짜리 최소 힙을 유지하면 됩니다. 힙이 k 개를 넘으면 가장 작은 것을 버립니다. 마지막에 맨 위에 남은 값이 답입니다. O(N log k).</p>
+        <div class="quiz" data-quiz="heap"></div>
+        <div class="lab" data-cell="kth-largest-element-in-array"></div>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chapter" id="ch-graph" data-title="물결처럼 퍼지는 탐색" data-num="07">
+      <div class="col">
+        <div class="opener">
+          <div class="num">07</div>
+          <h2>물결처럼<br>퍼지는 탐색</h2>
+          <p class="thesis">BFS 는 가까운 곳부터 차례로 퍼집니다. 그래서 가중치 없는 그래프에서 처음 도착한 순간이 곧 최단 거리입니다.</p>
+          <div class="tags"><span class="tag hot">PCCP 최다 출제</span><span class="tag">BFS · DFS · 격자</span><span class="tag">docs/12-graphs.md</span></div>
+        </div>
+        <p>미로의 왼쪽 위에서 오른쪽 아래까지 가장 빨리 가는 길. PCCP 에서 가장 자주 보는 모양입니다. 큐(deque)를 쓰면 BFS, 스택을 쓰면 DFS 가 됩니다. 아래 미로에서 두 방법을 번갈아 실행해 보세요. 칸을 눌러 벽을 바꿀 수 있습니다.</p>
+      </div>
+      <figure class="fig" data-widget="grid"></figure>
+      <div class="col">
+        <p>BFS 는 거리 1 인 칸을 모두 본 뒤에야 거리 2 인 칸으로 갑니다. 물에 돌을 던졌을 때 퍼지는 물결과 같습니다. DFS 는 한 방향으로 끝까지 파고들기 때문에 도착은 하지만 <mark>최단 경로라는 보장이 없습니다.</mark></p>
+        <pre class="code" data-code="from collections import deque
+dist = [[-1] * C for _ in range(R)]
+dist[0][0] = 1
+q = deque([(0, 0)])
+while q:
+    r, c = q.popleft()
+    for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        nr, nc = r + dr, c + dc
+        if 0 <= nr < R and 0 <= nc < C and maps[nr][nc] == 1 and dist[nr][nc] == -1:
+            dist[nr][nc] = dist[r][c] + 1    # 큐에 넣을 때 방문 표시!
+            q.append((nr, nc))"></pre>
+        <div class="pen">방문 표시는 꺼낼 때가 아니라 넣을 때. 안 그러면 같은 칸이 큐에 여러 번 들어간다.</div>
+        <div class="quiz" data-quiz="graph"></div>
+        <div class="lab" data-cell="shortest-path-in-grid-maze"></div>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chapter" id="ch-dijkstra" data-title="확정된 거리부터 넓혀 가기" data-num="08">
+      <div class="col">
+        <div class="opener">
+          <div class="num">08</div>
+          <h2>확정된 거리부터<br>넓혀 가기</h2>
+          <p class="thesis">간선마다 비용이 다르면 BFS 의 물결은 깨집니다. 다익스트라는 "지금 가장 가까운 곳" 을 힙에서 꺼내며 물결을 다시 만듭니다.</p>
+          <div class="tags"><span class="tag">PCCP 4번 문제급</span><span class="tag">다익스트라 · 힙</span><span class="tag">docs/13-advanced-graphs.md</span></div>
+        </div>
+        <p>규칙은 하나입니다. 아직 확정되지 않은 노드 중에서 출발점과 가장 가까운 것을 꺼내면, 그 거리는 확정입니다. 음수 간선이 없다면 다른 길로 돌아와서 더 짧아질 수 없기 때문입니다. 꺼낸 노드에서 이웃으로 가는 거리를 갱신(relax)하고, 갱신된 것은 힙에 넣습니다.</p>
+      </div>
+      <figure class="fig" data-widget="dijkstra"></figure>
+      <div class="col">
+        <pre class="code" data-code="dist = [inf] * (n + 1)
+dist[k] = 0
+h = [(0, k)]
+while h:
+    d, u = heapq.heappop(h)
+    if d > dist[u]:            # 이미 더 짧은 거리로 확정된 낡은 항목
+        continue
+    for v, w in graph[u]:
+        if d + w < dist[v]:
+            dist[v] = d + w
+            heapq.heappush(h, (dist[v], v))"></pre>
+        <p><code>if d &gt; dist[u]: continue</code> 한 줄이 중요합니다. 같은 노드가 힙에 여러 번 들어갈 수 있는데, 낡은 항목을 버리는 줄입니다. 이 줄이 없으면 정답은 나와도 시간 초과가 날 수 있습니다. 전체 복잡도는 O(E log V).</p>
+        <div class="quiz" data-quiz="dijkstra"></div>
+        <div class="lab" data-cell="network-delay-time"></div>
+      </div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chapter" id="ch-dp" data-title="같은 질문에 두 번 답하지 않기" data-num="09">
+      <div class="col">
+        <div class="opener">
+          <div class="num">09</div>
+          <h2>같은 질문에<br>두 번 답하지 않기</h2>
+          <p class="thesis">DP 는 마법이 아닙니다. 작은 문제의 답을 적어 두고 다시 쓰는 것뿐입니다. 어려운 건 "작은 문제" 를 정의하는 일입니다.</p>
+          <div class="tags"><span class="tag hot">PCCP · 인터뷰 공통 난관</span><span class="tag">DP · 메모이제이션</span><span class="tag">docs/14 · docs/15</span></div>
+        </div>
+        <p>피보나치 수 f(n) = f(n−1) + f(n−2) 를 그대로 재귀로 짜면 같은 계산을 셀 수 없이 반복합니다. 아래 그림에서 n 을 키워 보세요. 그리고 메모를 켜 보세요.</p>
+      </div>
+      <figure class="fig" data-widget="fib"></figure>
+      <div class="col">
+        <p>메모가 없으면 호출 수는 약 1.6ⁿ 로 늘어납니다. 메모가 있으면 각 n 을 한 번씩만 계산하므로 약 2n 번입니다. <mark>DP 의 시간 = 상태의 개수 × 상태 하나를 계산하는 비용.</mark> 이 공식 하나로 모든 DP 의 복잡도를 셀 수 있습니다.</p>
+        <h3>상태를 정하는 연습: 동전 거스름돈</h3>
+        <p>동전 [1, 2, 5] 로 11원을 만드는 최소 개수. 상태는 "x 원을 만드는 최소 동전 수" = dp[x]. 마지막에 쓴 동전이 c 라면 나머지는 dp[x − c] 입니다. 그래서 <code>dp[x] = min(dp[x − c] + 1)</code>. 작은 금액부터 채워 나가면 됩니다.</p>
+      </div>
+      <figure class="fig" data-widget="coins"></figure>
+      <div class="col">
+        <div class="pen">DP 5단계: 상태 정의 → 점화식 → 초기값 → 계산 순서 → 답의 위치.</div>
+        <div class="quiz" data-quiz="dp"></div>
+        <div class="lab" data-cell="coin-change"></div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chapter" id="ch-intervals" data-title="정렬하면 보이는 것들" data-num="10">
+      <div class="col">
+        <div class="opener">
+          <div class="num">10</div>
+          <h2>정렬하면<br>보이는 것들</h2>
+          <p class="thesis">구간 문제의 절반은 정렬 한 줄로 풀립니다. 시작점으로 정렬하면, 겹치는 구간은 반드시 이웃합니다.</p>
+          <div class="tags"><span class="tag hot">인터뷰 단골</span><span class="tag">구간 · 그리디 · 정렬</span><span class="tag">docs/16 · docs/17</span></div>
+        </div>
+        <p>회의 일정이나 차량의 이동 구간처럼 [시작, 끝] 쌍이 잔뜩 주어지면 일단 정렬합니다. 시작점 순서로 놓으면, 지금 구간이 직전에 합친 구간과 겹치는지만 확인하면 됩니다. <mark>겹치면 끝을 늘리고, 안 겹치면 새로 시작.</mark></p>
+      </div>
+      <figure class="fig" data-widget="intervals"></figure>
+      <div class="col">
+        <pre class="code" data-code="intervals.sort()
+merged = []
+for s, e in intervals:
+    if merged and s <= merged[-1][1]:       # 겹친다
+        merged[-1][1] = max(merged[-1][1], e)
+    else:
+        merged.append([s, e])"></pre>
+        <p>끝점으로 정렬해야 하는 경우도 있습니다. "겹치지 않게 최대한 많이 고르기", "모든 차가 한 번은 지나가도록 카메라 최소로 놓기" 는 <b>가장 먼저 끝나는 것</b>부터 고르는 그리디입니다. 일찍 끝날수록 다음을 위한 자리가 많이 남기 때문입니다.</p>
+        <div class="quiz" data-quiz="intervals"></div>
+        <div class="lab" data-cell="merge-intervals"></div>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chapter" id="ch-sim" data-title="지문을 그대로 옮기는 기술" data-num="11">
+      <div class="col">
+        <div class="opener">
+          <div class="num">11</div>
+          <h2>지문을 그대로<br>옮기는 기술</h2>
+          <p class="thesis">PCCP 1·2번은 대개 알고리즘보다 정확함을 봅니다. 긴 지문을 조건 목록으로 바꾸고, 하나씩 코드로 옮기세요.</p>
+          <div class="tags"><span class="tag hot">PCCP 1·2번</span><span class="tag">구현 · 시뮬레이션</span><span class="tag">docs/19-implementation.md</span></div>
+        </div>
+        <p>시뮬레이션 문제의 적은 알고리즘이 아니라 실수입니다. 방향을 잘못 돌리고, 격자 밖으로 나가고, 행과 열을 바꿔 씁니다. 그래서 고수들은 매번 같은 틀을 씁니다. <mark>방향은 배열 두 개와 인덱스 하나로.</mark></p>
+      </div>
+      <figure class="fig" data-widget="robot"></figure>
+      <div class="col">
+        <pre class="code" data-code="dr = [-1, 0, 1, 0]          # 북 동 남 서 (시계 방향 순서)
+dc = [0, 1, 0, -1]
+d = 1                        # 동쪽을 보고 시작
+for cmd in commands:
+    if cmd == 'L':   d = (d + 3) % 4
+    elif cmd == 'R': d = (d + 1) % 4
+    else:
+        nr, nc = r + dr[d], c + dc[d]
+        if 0 <= nr < rows and 0 <= nc < cols:   # 밖으로 나가면 무시
+            r, c = nr, nc"></pre>
+        <p>방향을 시계 방향 순서로 배열에 넣어 두면 오른쪽 회전은 +1, 왼쪽 회전은 +3 (= −1) 입니다. if 문 네 개로 방향을 바꾸는 코드보다 짧고, 틀릴 곳이 없습니다.</p>
+        <div class="pen">조건을 주석으로 먼저 옮겨 적고, 예제를 손으로 한 번 따라간 뒤 코딩한다.</div>
+        <div class="quiz" data-quiz="sim"></div>
+        <div class="lab" data-cell="robot-commands"></div>
+      </div>
+    </section>
+
+    <footer class="end col">
+      <div class="opener">
+        <div class="num">∎</div>
+        <h2>이제 시계를<br>켜세요</h2>
+        <p class="thesis">12장의 도구를 모두 만졌다면, 남은 건 시간 압박 속에서 고르는 연습입니다.</p>
+      </div>
+      <p><b>PCCP 를 준비한다면</b> 4문제 120분입니다. 처음 10분은 네 문제를 모두 읽고 쉬운 순서를 정하세요. 부분 점수가 있으니 정답이 떠오르지 않으면 브루트포스라도 먼저 제출합니다. 저장소에서 <code>python practice.py mock start --mode pccp</code> 로 실전처럼 연습할 수 있습니다.</p>
+      <p><b>미국 테크 인터뷰를 준비한다면</b> 45분 동안 말하면서 풉니다. 문제를 다시 말하고, 질문하고, 브루트포스부터 설명한 뒤 최적화하고, 코드를 쓴 다음 손으로 테스트하세요. 이 코스의 모든 장 끝에 있는 영어 문장(docs 의 "영어로 설명하기")을 소리 내어 읽어 보세요.</p>
+      <p>140개 문제 전체는 저장소의 <code>practice.py</code> 와 학습 허브(<code>web/index.html</code>) 에 있습니다. 이 코스의 실습은 그중 12개를 브라우저에서 바로 풀 수 있게 옮긴 것입니다.</p>
+      <div class="pull">모든 연산을 세는 습관. 그게 이 코스가 남기고 싶은 단 하나입니다.</div>
+    </footer>
+  </main>
+</div>
+
+<!--COURSE:SCRIPTS-->
